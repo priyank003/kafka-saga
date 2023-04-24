@@ -4,19 +4,19 @@ import styled from "styled-components";
 import Card from "./Card";
 import { useStateValue } from "../StateProvider";
 import Navbar from "./Navbar";
+import { getProducts } from "../Api/index";
 
 function Home() {
   const [products, setProducts] = useState("");
-  
+
   useEffect(() => {
     const fetchdata = async () => {
-      const data = await axios.get("/products/get");
-      setProducts(data);
+      const res = await getProducts();
+
+      setProducts(res.data);
     };
     fetchdata();
   }, []);
-
-  
 
   return (
     <Container>
@@ -28,13 +28,14 @@ function Home() {
 
       <Main>
         {products &&
-          products?.data.map((product) => (
+          products?.map((product) => (
             <Card
+              pid={product.pid}
               id={product._id}
-              image={product.imageURL}
+              image={product.img}
               price={product.price}
               rating={product.rating}
-              title={product.title}
+              title={product.name}
             />
           ))}
       </Main>

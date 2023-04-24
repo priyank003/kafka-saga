@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import axios from "../axios";
+import { userLogin } from "../Api/index";
 import { useStateValue } from "../StateProvider";
 function Login() {
   const navigate = useNavigate();
@@ -10,26 +11,24 @@ function Login() {
 
   const [{}, dispatch] = useStateValue();
 
-  const login = (e) => {
+  const login = async (e) => {
     e.preventDefault();
 
-    axios
-      .post("/auth/login", { email, password })
-      .then((res) => {
-        if (!res.data.error) {
-          dispatch({
-            type: "SET_USER",
-            user: res.data,
-          });
+    const res = await userLogin({ email, password });
+    console.log(res);
 
-          localStorage.setItem("user", JSON.stringify(res.data));
+    if ((res.statusText = "OK")) {
+      dispatch({
+        type: "SET_USER",
+        user: res.data.user,
+      });
 
-          navigate("/");
-        } else if (res.data.error) {
-          alert(res.data.error);
-        }
-      })
-      .catch((err) => console.warn(err));
+      localStorage.setItem("user", JSON.stringify(res.data.tokens));
+
+      navigate("/");
+    } else if (res.data.error) {
+      alert(res.data.error);
+    }
   };
   return (
     <Container>

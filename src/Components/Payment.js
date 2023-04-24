@@ -8,6 +8,7 @@ import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import Navbar from "./Navbar";
 import axios from "../axios";
 import { useNavigate } from "react-router-dom";
+import { placeOrder } from "../Api/index";
 
 function Payment() {
   const [{ address, basket, user }, dispatch] = useStateValue();
@@ -16,42 +17,47 @@ function Payment() {
   const stripe = useStripe();
 
   const navigate = useNavigate();
-  useEffect(() => {
-    const fetchClientSecret = async () => {
-      const data = await axios.post("/payment/create", {
-        amount: getBasketTotal(basket),
-      });
+  // useEffect(() => {
+  //   const fetchClientSecret = async () => {
+  //     const data = await axios.post("/payment/create", {
+  //       amount: getBasketTotal(basket),
+  //     });
 
-      setClientSecret(data.data.clientSecret);
-    };
+  //     setClientSecret(data.data.clientSecret);
+  //   };
 
-    fetchClientSecret();
-    console.log("clientSecret is >>>>", clientSecret);
-  }, []);
+  //   fetchClientSecret();
+  //   console.log("clientSecret is >>>>", clientSecret);
+  // }, []);
 
   const confirmPayment = async (e) => {
     e.preventDefault();
 
-    await stripe
-      .confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: elements.getElement(CardElement),
-        },
-      })
-      .then((result) => {
-        axios.post("/orders/add", {
-          basket: basket,
-          price: getBasketTotal(basket),
-          email: user?.email,
-          address: address,
-        });
+    const res = await placeOrder(basket[0]);
+    console.log(res);
+    if (res.data.order === "ok") {
+      alert("Order successfully placed");
+    }
+    // await stripe
+    //   .confirmCardPayment(clientSecret, {
+    //     payment_method: {
+    //       card: elements.getElement(CardElement),
+    //     },
+    //   })
+    //   .then((result) => {
+    //     axios.post("/orders/add", {
+    //       basket: basket,
+    //       price: getBasketTotal(basket),
+    //       email: user?.email,
+    //       address: address,
+    //     });
 
-        dispatch({
-          type: "EMPTY_BASKET",
-        });
-        navigate("/");
-      })
-      .catch((err) => console.warn(err));
+    //     dispatch({
+    //       type: "EMPTY_BASKET",
+    //     });
+    //     navigate("/");
+    //   })
+    //   .catch((err) => console.warn(err));
   };
 
   return (
@@ -83,8 +89,6 @@ function Payment() {
 
             <div>
               <p>Card Details</p>
-
-              {/* Card Element */}
 
               <CardElement />
             </div>

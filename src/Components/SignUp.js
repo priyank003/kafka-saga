@@ -2,19 +2,25 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import axios from "../axios";
+import { registerUser } from "../Api/index";
 function SignUp() {
   const navigate = useNavigate();
 
   const [fullName, setFullName] = useState("");
+  const [userName, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const signup = (e) => {
+  const signup = async (e) => {
     e.preventDefault();
-    axios
-      .post("/auth/signup", { email, password, fullName })
-      .then((res) => alert(res.data.message))
-      .catch((err) => console.warn(err));
+
+    const res = await registerUser({ email, fullName, userName, password });
+
+    console.log(res);
+    // axios
+    //   .post("/auth/signup", { email, password, fullName })
+    //   .then((res) => alert(res.data.message))
+    //   .catch((err) => console.warn(err));
 
     navigate("/login");
   };
@@ -35,6 +41,15 @@ function SignUp() {
           />
         </InputContainer>
         <InputContainer>
+          <p>Username</p>
+          <input
+            type="text"
+            placeholder="John129"
+            onChange={(e) => setUserName(e.target.value)}
+            value={userName}
+          />
+        </InputContainer>
+        <InputContainer>
           <p>Email</p>
           <input
             type="email"
@@ -46,7 +61,7 @@ function SignUp() {
         <InputContainer>
           <p>Password</p>
           <input
-            type="password"
+            type="text"
             placeholder="********"
             onChange={(e) => setPassword(e.target.value)}
             value={password}

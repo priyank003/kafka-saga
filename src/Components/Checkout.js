@@ -75,10 +75,11 @@ function Checkout() {
 const Container = styled.div`
   width: 100%;
   max-width: 1400px;
+  min-height:100vh;
   height: fit-content;
   margin: auto;
   background-color: rgb(234, 237, 237);
-  border: 1px solid red;
+
   position: relative;
 `;
 const Main = styled.div`
