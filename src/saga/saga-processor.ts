@@ -5,6 +5,8 @@ import {
   STEP_PHASE,
 } from "./saga-definition-builder";
 
+import { redisClient } from "../redis.config";
+
 const kafka = new Kafka({ brokers: ["localhost:9092"] });
 const admin = kafka.admin();
 
@@ -33,7 +35,7 @@ export class SagaProcessor {
     }
 
     await this.consumer.run({
-      eachMessage: async ({ topic, message, partition }) => {
+      eachMessage: async ({ topic, message, heartbeat, partition }) => {
         const sagaMessage = JSON.parse(
           message.value!.toString()
         ) as SagaMessage;
@@ -69,6 +71,7 @@ export class SagaProcessor {
             console.log("UNAVAILBLE SAGA PHASE");
           }
         }
+        await heartbeat();
       },
     });
   }
@@ -88,6 +91,8 @@ export class SagaProcessor {
           },
         ],
       });
+
+      await redisClient.set("curr-trans", "success");
 
       return;
     }
@@ -120,7 +125,13 @@ export class SagaProcessor {
   }
 
   async start(payload: any) {
-    await this.makeStepForward(0, payload);
-    console.log("Saga started");
+    const currentTransaction = await redisClient.get("curr-trans");
+    console.log(currentTransaction);
+    console.log("start", payload);
+    if (currentTransaction === null || "success") {
+      await redisClient.set("curr-trans", "pending");
+      await this.makeStepForward(0, payload);
+      console.log("Saga started");
+    }
   }
 }

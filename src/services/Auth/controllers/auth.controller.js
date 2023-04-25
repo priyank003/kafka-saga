@@ -6,6 +6,8 @@ const registerUser = async (req, res) => {
   // console.log(req.body);
   const user = await userService.createUser(req.body);
 
+  await userService.createAccountWallet(req.body);
+
   console.log("user", user);
 
   const tokens = await tokenService.generateAuthTokens(user);

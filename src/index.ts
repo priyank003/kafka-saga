@@ -1,10 +1,8 @@
 import express, { Request, Response, Application } from "express";
 const app: Application = express();
 import { Kafka, ITopicConfig } from "kafkajs";
+
 const kafka = new Kafka({ brokers: ["localhost:9092"] });
-const consumer = kafka.consumer({ groupId: "saga-consumer" });
-consumer.connect();
-consumer.subscribe({ topic: "Order-status", fromBeginning: true });
 
 app.use(express.json());
 
@@ -12,7 +10,7 @@ const PORT = 9000;
 
 import { SagaDefinitionBuilder } from "./saga/saga-definition-builder";
 import axios from "axios";
-
+import { connectRedis } from "./redis.config";
 const configReply = [
   {
     method: "post",
@@ -55,7 +53,7 @@ async function run(data: any) {
   const sagaDefinitionBuilder = new SagaDefinitionBuilder()
     .step("Warehouse-service")
     .onReply(async (P: any) => {
-      // invoke ware hpuse Service API to fetch item
+      // invoke ware house Service API to fetch item
       console.log("STEP1 FORWARD");
 
       return await axios.post(configReply[0].url, P);
@@ -63,7 +61,7 @@ async function run(data: any) {
       // console.log("STEP1 DATA", res.data);
     })
     .withCompensation(async (P: any) => {
-      // invoke Flight Booking Service API to roll back previosly reserved ticket
+      // invoke warehouse Service API to roll back previosly reserved ticket
       console.log("STEP1 COMPENSATION");
 
       return await axios.post(configCompensate[0].url, P);
@@ -78,7 +76,7 @@ async function run(data: any) {
 
       // console.log("STEP 2 DATA", res.data);
     })
-    .withCompensation(async (P:any) => {
+    .withCompensation(async (P: any) => {
       // invoke Order service API to roll back previously created order
 
       console.log("STEP2 COMPENSATION");
@@ -131,23 +129,29 @@ async function run(data: any) {
 
 app.post("/", async (req: Request, res: Response) => {
   const orderData = req.body;
+
   run(orderData).then(async () => {
+    const consumer = kafka.consumer({ groupId: "saga-consumer" });
+    await consumer.connect();
+    await consumer.subscribe({ topic: "Order-status", fromBeginning: true });
+
     await consumer.run({
       eachMessage: async ({ topic, partition, message }) => {
-        console.log("order service  status");
         const orderResponse = JSON.parse(String(message.value));
-        console.log("order res in index ts", orderResponse);
+
         if (orderResponse.order_status === "success") {
           res.send({
             order: "ok",
             data: orderResponse.data,
           });
+          await consumer.disconnect();
         }
       },
     });
   });
 });
 
-app.listen(PORT, (): void => {
+app.listen(PORT, async () => {
+  await connectRedis();
   console.log(`Server Running here 👉 https://localhost:${PORT}`);
 });

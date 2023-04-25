@@ -10,7 +10,6 @@ const producer = kafka.producer();
 
 const app = express();
 
-
 app.use(express.json());
 
 const PORT = 8003;
@@ -36,11 +35,11 @@ app.post("/", async (req, res) => {
   // }
   orderBody["shipping_id"] = randomBytes(8).toString("hex");
   orderBody["shipping_status"] = "DISPATCHED";
-  res.send(orderBody);
+  return res.send(orderBody);
 });
 
 app.get("/compensate", (req, res) => {
-  res.send(`${service} service rollback`);
+  return res.send(`${service} service rollback`);
 });
 
 app.listen(PORT, (req, res) => {

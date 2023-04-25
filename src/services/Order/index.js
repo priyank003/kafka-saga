@@ -1,4 +1,5 @@
 const express = require("express");
+const morgan = require("morgan");
 
 const { ErrorHandler } = require("./utils/error");
 
@@ -19,6 +20,7 @@ const consumer = kafka.consumer({ groupId: "order" });
 
 const app = express();
 app.use(express.json());
+app.use(morgan("dev"));
 
 const PORT = 8001;
 const service = "Order";
@@ -44,17 +46,16 @@ app.post("/", async (req, res) => {
   // throw new ErrorHandler(500, "internal server error");
 
   const data = req.body;
-
   const createdOrder = createOrder(data);
 
   cacheOrder(createdOrder);
 
-  res.send(createdOrder);
+  return res.send(createdOrder);
 });
 
-app.get("/compensate", async (req, res) => {
+app.post("/compensate", async (req, res) => {
   await compensateAction();
-  res.send(`${service} service rollback`);
+  return res.send(`${service} service rollback`);
 });
 app.listen(PORT, async (req, res) => {
   await mongoConnect();

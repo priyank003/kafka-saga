@@ -16,7 +16,7 @@ router.post("/", (req, res) => {
   warehouseCheck(data.product);
   cacheData(data.product);
 
-  res.send({
+  return res.send({
     ...data,
     warehouseCheck: true,
   });
@@ -24,13 +24,13 @@ router.post("/", (req, res) => {
 
 router.post("/compensate", async (req, res) => {
   await compensateAction();
-  res.send(`$warehouse service rollback`);
+  return res.send(`$warehouse service rollback`);
 });
 
 router.get("/products", async (req, res) => {
   const products = await getProducts();
 
-  res.send(products);
+  return res.send(products);
 });
 
 module.exports = router;
