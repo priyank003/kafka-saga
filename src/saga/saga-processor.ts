@@ -18,7 +18,6 @@ export class SagaProcessor {
 
   async init() {
     await admin.connect();
-    await this.producer.connect();
     await this.consumer.connect();
 
     const stepTopics = this.sagaDefinitions.map(
@@ -52,10 +51,18 @@ export class SagaProcessor {
                 .command;
             try {
               const res: any = await stepForward(payload);
+              console.log("res", res.data);
+              if (res.data.status === "failed") {
+                throw new Error(res.data.msg);
+              }
 
               await this.makeStepForward(index + 1, res.data);
             } catch (e) {
-              await this.makeStepBackward(index - 1, payload);
+              console.log("in catch block", stepTopics[index]);
+              await this.makeStepBackward(index - 1, {
+                status: "failed",
+                msg: e.message,
+              });
             }
             return;
           }
@@ -79,13 +86,12 @@ export class SagaProcessor {
   async makeStepForward(index: number, payload: any) {
     if (index >= this.sagaDefinitions.length) {
       console.log("====> Saga finished and transaction successful");
-      console.log("final payload", payload);
       await this.producer.send({
-        topic: "Order-status",
+        topic: "order-complete",
         messages: [
           {
             value: JSON.stringify({
-              order_status: "success",
+              order_status: "complete",
               order_data: payload,
             }),
           },
@@ -109,6 +115,22 @@ export class SagaProcessor {
   async makeStepBackward(index: number, payload: any) {
     if (index < 0) {
       console.log("===> Saga finished and transaction rolled back");
+      console.log("final rollback payload", payload);
+
+      await this.producer.send({
+        topic: "order-failed",
+        messages: [
+          {
+            value: JSON.stringify({
+              order_status: "failed",
+              msg: payload.msg,
+              // order_data: payload,
+            }),
+          },
+        ],
+      });
+
+      await redisClient.set("curr-trans", "failed");
       return;
     }
     await this.producer.send({
@@ -128,7 +150,30 @@ export class SagaProcessor {
     const currentTransaction = await redisClient.get("curr-trans");
     console.log(currentTransaction);
     console.log("start", payload);
-    if (currentTransaction === null || "success") {
+    await this.producer.connect();
+    await this.producer.send({
+      topic: "order-complete",
+      messages: [
+        {
+          value: JSON.stringify({
+            order_status: "pending",
+          }),
+        },
+      ],
+    });
+    await this.producer.send({
+      topic: "order-failed",
+      messages: [
+        {
+          value: JSON.stringify({
+            order_status: "pending",
+            // order_data: payload,
+          }),
+        },
+      ],
+    });
+
+    if (currentTransaction === null || "success" || "failed") {
       await redisClient.set("curr-trans", "pending");
       await this.makeStepForward(0, payload);
       console.log("Saga started");

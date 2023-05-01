@@ -1,6 +1,7 @@
 import express, { Request, Response, Application } from "express";
 const app: Application = express();
 import { Kafka, ITopicConfig } from "kafkajs";
+import { redisClient } from "./redis.config";
 
 const kafka = new Kafka({ brokers: ["localhost:9092"] });
 
@@ -123,32 +124,77 @@ async function run(data: any) {
   //     address: "Pune",
   //   },
   // });
-
-  sagaProcessor.start(data);
+  // return new Promise((resolve) => sagaProcessor.start(data));
+  return sagaProcessor.start(data);
 }
 
 app.post("/", async (req: Request, res: Response) => {
   const orderData = req.body;
+  const producer = kafka.producer();
+  await producer.connect();
+  await producer.send({
+    topic: "order-complete",
+    messages: [
+      {
+        value: JSON.stringify({
+          order_status: "pending",
+        }),
+      },
+    ],
+  });
+  await producer.send({
+    topic: "order-failed",
+    messages: [
+      {
+        value: JSON.stringify({
+          order_status: "pending",
+          // order_data: payload,
+        }),
+      },
+    ],
+  });
 
-  run(orderData).then(async () => {
+  await run(orderData).then(async () => {
     const consumer = kafka.consumer({ groupId: "saga-consumer" });
     await consumer.connect();
-    await consumer.subscribe({ topic: "Order-status", fromBeginning: true });
+    const orderStatusTopics = ["order-complete", "order-failed"];
+    orderStatusTopics.map(async (item) => {
+      await consumer.subscribe({ topic: item, fromBeginning: true });
+    });
 
     await consumer.run({
       eachMessage: async ({ topic, partition, message }) => {
         const orderResponse = JSON.parse(String(message.value));
 
-        if (orderResponse.order_status === "success") {
+        const currentTransaction = await redisClient.get("curr-trans");
+        if (
+          orderResponse.order_status === "complete" &&
+          currentTransaction === "success"
+        ) {
           res.send({
             order: "ok",
             data: orderResponse.data,
           });
-          await consumer.disconnect();
+
+          return await consumer.disconnect();
+        } else if (
+          orderResponse.order_status === "failed" &&
+          currentTransaction === "failed"
+        ) {
+          res.send({
+            order: "failed",
+            msg: orderResponse.msg,
+          });
+
+          return await consumer.disconnect();
         }
       },
     });
   });
+
+  // await consumeTopic();
+
+  // consumeTopic();
 });
 
 app.listen(PORT, async () => {

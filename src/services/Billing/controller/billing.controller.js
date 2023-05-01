@@ -15,11 +15,12 @@ const getWalletAmount = async (username) => {
   return userWallet.walletAmount;
 };
 
-const updateWalletAmount = async (operation, q, username) => {
+const updateWalletAmount = async (operation, products, username) => {
+  const totalPrice = calculateTotalPrice(products);
   if (operation === "-") {
     await Wallet.updateOne(
       { userName: username },
-      { $inc: { walletAmount: -q } }
+      { $inc: { walletAmount: -totalPrice } }
     );
 
     const wallet = await getWalletAmount(username);
@@ -27,7 +28,7 @@ const updateWalletAmount = async (operation, q, username) => {
   } else if (operation === "+") {
     await Wallet.updateOne(
       { userName: username },
-      { $inc: { walletAmount: q } }
+      { $inc: { walletAmount: totalPrice } }
     );
 
     const wallet = await getWalletAmount(username);
@@ -35,19 +36,29 @@ const updateWalletAmount = async (operation, q, username) => {
   }
 };
 
-const validatePayment = async (user, price) => {
+const validatePayment = async (user, products) => {
   const walletAmount = await getWalletAmount(user.username);
 
+  const totalPrice = calculateTotalPrice(products);
   console.log("current wallet amount before purchase", walletAmount);
-  console.log(walletAmount, price);
-  if (Number(walletAmount) >= Number(price)) {
+
+  if (Number(walletAmount) >= Number(totalPrice)) {
     return true;
   } else {
-    throw new ErrorHandler(500, "low amount in wallet");
+    return false;
+    // throw new ErrorHandler(500, "low amount in wallet");
   }
-
-  //   return false;
 };
+
+function calculateTotalPrice(products) {
+  let totalPrice = 0;
+
+  products.map((item) => {
+    totalPrice += item.quantity * item.price;
+  });
+
+  return totalPrice;
+}
 module.exports = {
   createWallet,
   getWalletAmount,

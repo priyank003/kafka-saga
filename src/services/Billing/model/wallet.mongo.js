@@ -26,7 +26,7 @@ const walletSchema = new mongoose.Schema({
   },
   walletAmount: {
     type: Number,
-    default: 100000,
+    default: 1000,
   },
 });
 

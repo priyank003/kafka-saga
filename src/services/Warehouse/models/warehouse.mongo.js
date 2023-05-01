@@ -7,6 +7,7 @@ const warehouseSchema = new mongoose.Schema({
   quantity: Number,
   img: String,
   rating: Number,
+  description: String,
 });
 
 module.exports = mongoose.model("Warehouse", warehouseSchema);

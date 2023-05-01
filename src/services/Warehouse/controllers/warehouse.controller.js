@@ -3,19 +3,19 @@ const { ErrorHandler } = require("../utils/error");
 const { redisClient } = require("../services/redis");
 
 const warehouseCheck = async (product) => {
-  console.log(product);
-  const checkQty = await Warehouse.findOne({
-    pid: product.pid,
-    quantity: { $gte: product.quantity },
+  console.log("in warehouse check", product);
+
+  product.map(async (item) => {
+    const checkQty = await Warehouse.findOne({
+      pid: item.pid,
+      quantity: { $gte: item.quantity },
+    });
+    if (checkQty) {
+      return true;
+    } else {
+      throw new ErrorHandler(500, `${item.title} not found in warehouse`);
+    }
   });
-
-  console.log(checkQty);
-
-  if (checkQty) {
-    return true;
-  } else {
-    throw new ErrorHandler(500, "Item not found in warehouse");
-  }
 };
 
 const cacheData = async (data) => {

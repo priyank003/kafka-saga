@@ -25,13 +25,15 @@ app.post("/createWallet", createWallet);
 app.post("/", async (req, res) => {
   const orderBody = req.body;
   const { product, customer } = orderBody;
-  const paymentStatus = await validatePayment(customer, product.price);
+  const paymentStatus = await validatePayment(customer, product);
   console.log("paymentStatus", paymentStatus);
   if (paymentStatus) {
-    updateWalletAmount("-", product.price, customer.username);
+    updateWalletAmount("-", product, customer.username);
 
     orderBody.status = "PAYMENT_SUCCESS";
     return res.send(orderBody);
+  } else {
+    return res.send({ status: "failed", msg: "not enough balance in wallet" });
   }
   //  else {
   //   throw new ErrorHandler(500, "Wallet balance is low");
