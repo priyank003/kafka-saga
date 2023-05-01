@@ -5,7 +5,8 @@ import Card from "./Card";
 import { useStateValue } from "../StateProvider";
 import Navbar from "./Navbar";
 import { getProducts } from "../Api/index";
-
+import banner from "../assets/_DesktopTallHero_3000x1200._CB591042106_.jpg";
+import AIT from "../assets/ait2.55aa091d.55aa091d.webp";
 function Home() {
   const [products, setProducts] = useState("");
 
@@ -22,11 +23,39 @@ function Home() {
     <Container>
       <Navbar />
       <Banner>
-        <img src="./banner.jpg" alt="" />
-        <img src="./mobile_banner.jpg" alt="" />
+        {/* <img src="./banner.jpg" alt="" /> */}
+        {/* <img src="./mobile_banner.jpg" alt="" /> */}
+        <img
+          src={banner}
+          alt="banner"
+          style={{ borderRadius: "25px 25px 0 0 " }}
+        />
       </Banner>
 
       <Main>
+        {products &&
+          products?.map((product) => (
+            <Card
+              pid={product.pid}
+              id={product._id}
+              image={product.img}
+              price={product.price}
+              rating={product.rating}
+              title={product.name}
+              description={product.description}
+            />
+          ))}
+        {products &&
+          products?.map((product) => (
+            <Card
+              pid={product.pid}
+              id={product._id}
+              image={product.img}
+              price={product.price}
+              rating={product.rating}
+              title={product.name}
+            />
+          ))}
         {products &&
           products?.map((product) => (
             <Card
@@ -45,10 +74,10 @@ function Home() {
 
 const Container = styled.div`
   width: 100%;
-  background-color: rgb(234, 237, 237);
+  // background-color: white;
   max-width: 1400px;
   margin: auto;
-  height: fit-content;
+  height: max-content;
 `;
 
 const Banner = styled.div`
@@ -83,15 +112,21 @@ const Banner = styled.div`
 `;
 
 const Main = styled.div`
-  display: grid;
-  justify-content: center;
-  place-items: center;
+  position: relative;
+  bottom: 100px;
+  z-index: 1;
+  // display: grid;
+  // justify-content: center;
+  // place-items: center;
   width: 100%;
 
-  grid-auto-rows: 420px;
-  grid-template-columns: repeat(4, 280px);
-  grid-gap: 20px;
+  // grid-auto-rows: 420px;
+  // grid-template-columns: repeat(4, 280px);
+  // grid-gap: 20px;
 
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
   /* Mobile */
   @media only screen and (max-width: 767px) {
     grid-template-columns: repeat(2, 50%);

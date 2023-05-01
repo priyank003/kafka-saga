@@ -136,7 +136,7 @@ const FormContainer = styled.form`
     height: 33px;
     width: 250px;
     margin-top: 20px;
-    background-color: #ffa32a;
+    background-color: #eaeaea;
     border: none;
     outline: none;
     border-radius: 5px;

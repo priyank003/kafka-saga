@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import Rating from "@material-ui/lab/Rating";
 import { useStateValue } from "../StateProvider";
-function Card({ pid, id, image, title, price, rating }) {
+function Card({ pid, id, image, title, price, rating, description }) {
   const [{ basket }, dispatch] = useStateValue();
   console.log("basket >>>>", basket);
   const addToBasket = (e) => {
@@ -18,6 +18,7 @@ function Card({ pid, id, image, title, price, rating }) {
         price,
         image,
         rating,
+        description,
       },
     });
   };
@@ -44,8 +45,10 @@ function Card({ pid, id, image, title, price, rating }) {
 }
 
 const Container = styled.div`
-  width: 100%;
-  height: 100%;
+  height: 400px;
+  width: 300px;
+  margin: 10px;
+  padding: 25px 10px;
 
   display: flex;
   flex-direction: column;
@@ -87,10 +90,11 @@ const Description = styled.div`
   button {
     width: 100%;
     height: 33px;
-    background-color: #fa8900;
+    background-color: #eaeaea;
     border: none;
     border-radius: 10px;
     cursor: pointer;
+    margin: 10px 0;
   }
 `;
 export default Card;

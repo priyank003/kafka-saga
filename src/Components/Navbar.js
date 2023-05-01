@@ -2,6 +2,8 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useStateValue } from "../StateProvider";
+import AIT_LOGO from "../assets/AIT_WHITE.png";
+import ecommerce from "../assets/ecommerce.png";
 
 function Navbar() {
   const [{ basket, user }, dispatch] = useStateValue();
@@ -20,7 +22,7 @@ function Navbar() {
     <Container>
       <Inner>
         <Logo onClick={() => navigate("/")}>
-          <img src="./amazon_logo1.png" alt="" />
+          <img src={ecommerce} alt="" style={{ width: "50px" }} />
         </Logo>
         <SearchBar>
           <input type="text" placeholder="Search..." />
@@ -35,10 +37,10 @@ function Navbar() {
             <p>Hello,</p>
             <p>{user ? user?.fullName : "Guest"}</p>
           </NavButton>
-          <NavButton onClick={() => navigate("/orders")}>
+          {/* <NavButton onClick={() => navigate("/orders")}>
             <p>Return</p>
             <p>& Orders</p>
-          </NavButton>
+          </NavButton> */}
           <BasketButton onClick={() => navigate("/checkout")}>
             <img src="./basket-icon.png" alt="" />
             <p>{basket?.length}</p>
@@ -58,10 +60,13 @@ function Navbar() {
 const Container = styled.div`
   width: 100%;
   height: 60px;
-  background-color: #131921;
+  background-color: black;
   display: flex;
   align-items: center;
   position: relative;
+  border-bottom: 2px solid white;
+  border-radius: 0 0 25px 25px;
+  padding: 10px 0;
 
   @media only screen and (max-width: 767px) {
     height: 120px;
@@ -135,7 +140,7 @@ const MobileSearchbar = styled.div`
 `;
 
 const SearchIcon = styled.div`
-  background-color: #febd69;
+  background-color: #eaeaea;
   height: 100%;
   width: 40px;
   display: flex;

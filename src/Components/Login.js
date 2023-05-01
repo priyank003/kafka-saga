@@ -32,9 +32,9 @@ function Login() {
   };
   return (
     <Container>
-      <Logo onClick={() => navigate("/")}>
+      {/* <Logo onClick={() => navigate("/")}>
         <img src="./amazon_logo.png" alt="" />
-      </Logo>
+      </Logo> */}
 
       <FormContainer>
         <h3>Sign-In</h3>
@@ -61,12 +61,12 @@ function Login() {
         <LoginButton onClick={login}>Login</LoginButton>
 
         <InfoText>
-          By continuing, you agree to Amazon's <span>Conditions of Use </span>
+          By continuing, you agree to <span>Conditions of Use </span>
           and <span> Privacy Notice</span>
         </InfoText>
       </FormContainer>
       <SignUpButton onClick={() => navigate("/signup")}>
-        Create Account in Amazon
+        Create Account in AIT mart
       </SignUpButton>
     </Container>
   );
@@ -92,6 +92,7 @@ const Logo = styled.div`
 `;
 
 const FormContainer = styled.form`
+  background: white;
   border: 1px solid lightgray;
   width: 55%;
   height: 400px;
@@ -137,7 +138,7 @@ const InputContainer = styled.div`
 const LoginButton = styled.button`
   width: 70%;
   height: 35px;
-  background-color: #f3b414;
+  background-color: #eaeaea;
   border: none;
   outline: none;
   border-radius: 10px;

@@ -26,9 +26,9 @@ function SignUp() {
   };
   return (
     <Container>
-      <Logo onClick={() => navigate("/")}>
+      {/* <Logo onClick={() => navigate("/")}>
         <img src="./amazon_logo.png" alt="" />
-      </Logo>
+      </Logo> */}
       <FormContainer>
         <h3>Sign-Up</h3>
         <InputContainer>
@@ -68,7 +68,7 @@ function SignUp() {
           />
         </InputContainer>
 
-        <SignUpButton onClick={signup}>Create Account in Amazon</SignUpButton>
+        <SignUpButton onClick={signup}>Create Account in AIT mart</SignUpButton>
       </FormContainer>
 
       <LoginButton onClick={() => navigate("/login")}>
@@ -97,6 +97,7 @@ const Logo = styled.div`
 `;
 
 const FormContainer = styled.form`
+  background: white;
   border: 1px solid lightgray;
   width: 55%;
   height: 400px;
@@ -146,7 +147,7 @@ const SignUpButton = styled.button`
   margin-top: 20px;
 
   &:hover {
-    background-color: #dfdfdf;
+    background-color: #dfdfdf];
     border: 1px solid gray;
   }
 `;
@@ -154,7 +155,7 @@ const SignUpButton = styled.button`
 const LoginButton = styled.button`
   width: 55%;
   height: 35px;
-  background-color: #f3b414;
+  background-color: white;
   border: none;
   outline: none;
   border-radius: 10px;

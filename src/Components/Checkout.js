@@ -5,6 +5,7 @@ import Navbar from "./Navbar";
 import CurrencyFormat from "react-currency-format";
 import { getBasketTotal } from "../reducer";
 import { useNavigate } from "react-router-dom";
+import Product from "./Product";
 function Checkout() {
   const [{ basket }, dispatch] = useStateValue();
   const navigate = useNavigate();
@@ -26,22 +27,28 @@ function Checkout() {
         <ShoppingCart>
           <h2>Shopping Cart</h2>
 
-          {basket?.map((product) => (
-            <Product>
-              <Image>
-                <img src={product.image} alt="" />
-              </Image>
-              <Description>
-                <h4>{product.title}</h4>
-
-                <p>₹ {product.price}</p>
-
-                <button onClick={(e) => removeFromBasket(e, product.id)}>
-                  Remove
-                </button>
-              </Description>
-            </Product>
-          ))}
+          {basket?.map((product) => {
+            console.log(product);
+            return (
+              // <Product>
+              //   <Image>
+              //     <img src={product.image} alt="" />
+              //   </Image>
+              //   <Description>
+              //     <h2>{product.title}</h2>
+              //     <p>✅ In stock</p>
+              //     <p className="desc">{product.description}</p>
+              //   </Description>
+              //   <Price>
+              //     <h1>₹ {product.price}</h1>
+              //     <button onClick={(e) => removeFromBasket(e, product.id)}>
+              //       Remove
+              //     </button>
+              //   </Price>
+              // </Product>
+              <Product product={product} onRemove={removeFromBasket} />
+            );
+          })}
         </ShoppingCart>
         <Subtotal>
           <CurrencyFormat
@@ -50,10 +57,10 @@ function Checkout() {
                 <p>
                   Subtotal ( {basket.length} items ) : <strong> {value}</strong>
                 </p>
-                <small>
+                {/* <small>
                   <input type="checkbox" />
                   <span>This order contains a gift.</span>
-                </small>
+                </small> */}
               </>
             )}
             decimalScale={2}
@@ -75,7 +82,7 @@ function Checkout() {
 const Container = styled.div`
   width: 100%;
   max-width: 1400px;
-  min-height:100vh;
+  min-height: 100vh;
   height: fit-content;
   margin: auto;
   background-color: rgb(234, 237, 237);
@@ -92,7 +99,7 @@ const Main = styled.div`
 `;
 const ShoppingCart = styled.div`
   padding: 15px;
-  background-color: #fff;
+
   flex: 0.7;
 
   @media only screen and (max-width: 1200px) {
@@ -137,7 +144,7 @@ const Subtotal = styled.div`
     width: 65%;
     height: 33px;
     margin-top: 20px;
-    background-color: #ffd814;
+    background-color: #eaeaea;
     border: none;
     outline: none;
 
@@ -145,28 +152,48 @@ const Subtotal = styled.div`
   }
 `;
 
-const Product = styled.div`
+const Products = styled.div`
+  background: white;
+  padding: 25px 10px;
+  margin: 10px 0;
+  position: relative;
+  width: 100%;
   display: flex;
   align-items: center;
+  // justify-content: space-between;
 `;
 
 const Image = styled.div`
-  flex: 0.3;
+  flex: 0.2;
   img {
     width: 100%;
+    height: 200px;
   }
 `;
 const Description = styled.div`
   flex: 0.7;
+  padding: 0 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 
-  h4 {
+  // align-self: flex-start;
+
+  h2 {
     font-weight: 600;
     font-size: 18px;
+    border: none;
   }
 
   p {
     font-weight: 600;
-    margin-top: 10px;
+    // margin-top: 10px;
+  }
+  .desc {
+    margin: 10px 0;
+    padding: 10px 0;
+
+    color: gray;
   }
 
   button {
@@ -174,6 +201,36 @@ const Description = styled.div`
     color: #1384b4;
     border: none;
     outline: none;
+    margin-top: 10px;
+    cursor: pointer;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+`;
+const Price = styled.div`
+  position: absolute;
+  right: 0;
+  padding: 10px;
+  h2 {
+    font-weight: 600;
+    font-size: 18px;
+  }
+
+  p {
+    font-weight: 600;
+    // margin-top: 10px;
+  }
+
+  button {
+    background-color: #eaeaea;
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+
+    // color: #1384b4;
+    border: none;
+    // outline: none;
     margin-top: 10px;
     cursor: pointer;
     &:hover {

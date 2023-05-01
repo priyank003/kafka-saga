@@ -48,8 +48,9 @@ function App() {
 
 const Container = styled.div`
   width: 100vw;
-  height: 100vh;
-overflow-y: scroll;
+  background: #eaeaea;
+
+  overflow-y: scroll;
   &::-webkit-scrollbar {
     display: none;
   }

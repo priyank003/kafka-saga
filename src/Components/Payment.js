@@ -9,12 +9,14 @@ import Navbar from "./Navbar";
 import axios from "../axios";
 import { useNavigate } from "react-router-dom";
 import { placeOrder } from "../Api/index";
+import Product from "./Product";
 
 function Payment() {
   const [{ address, basket, user }, dispatch] = useStateValue();
   const [clientSecret, setClientSecret] = useState("");
   const elements = useElements();
   const stripe = useStripe();
+  console.log("basket before paymment", basket);
 
   const navigate = useNavigate();
   // useEffect(() => {
@@ -33,10 +35,12 @@ function Payment() {
   const confirmPayment = async (e) => {
     e.preventDefault();
 
-    const res = await placeOrder(basket[0]);
+    const res = await placeOrder(basket);
     console.log(res);
     if (res.data.order === "ok") {
       alert("Order successfully placed");
+    } else {
+      alert(`Could not place order due to ${res.data.msg}`);
     }
     // await stripe
     //   .confirmCardPayment(clientSecret, {
@@ -83,7 +87,7 @@ function Payment() {
               <p>Phone: {address.phone}</p>
             </div>
           </AddressContainer>
-
+          {/* 
           <PaymentContainer>
             <h5>Payment Method</h5>
 
@@ -92,23 +96,24 @@ function Payment() {
 
               <CardElement />
             </div>
-          </PaymentContainer>
+          </PaymentContainer> */}
 
           <OrderContainer>
             <h5>Your Order</h5>
 
             <div>
               {basket?.map((product) => (
-                <Product>
-                  <Image>
-                    <img src={product.image} alt="" />
-                  </Image>
-                  <Description>
-                    <h4>{product.title}</h4>
+                // <Product>
+                //   <Image>
+                //     <img src={product.image} alt="" />
+                //   </Image>
+                //   <Description>
+                //     <h4>{product.title}</h4>
 
-                    <p>₹ {product.price}</p>
-                  </Description>
-                </Product>
+                //     <p>₹ {product.price}</p>
+                //   </Description>
+                // </Product>
+                <Product product={product} />
               ))}
             </div>
           </OrderContainer>
@@ -193,7 +198,7 @@ const OrderContainer = styled.div`
   margin-top: 30px;
 `;
 
-const Product = styled.div`
+const Products = styled.div`
   display: flex;
   align-items: center;
 `;
@@ -261,7 +266,7 @@ const Subtotal = styled.div`
     width: 65%;
     height: 33px;
     margin-top: 20px;
-    background-color: #ffd814;
+    background-color: #eaeaea;
     border: none;
     outline: none;
 
