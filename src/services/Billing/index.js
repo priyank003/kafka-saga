@@ -7,6 +7,7 @@ const {
   updateWalletAmount,
 } = require("./controller/billing.controller");
 const { mongoConnect } = require("./services/mongo");
+const { connectRedis } = require("./services/redis");
 
 const app = express();
 app.use(express.json());
@@ -45,13 +46,15 @@ app.post("/", async (req, res) => {
 
 app.post("/compensate", (req, res) => {
   const { product, customer } = req.body;
+  console.log(req.body);
 
-  updateWalletAmount("+", product.price, customer.username);
+  updateWalletAmount("+");
 
   return res.send(`${service} service rollback`);
 });
 
 app.listen(PORT, async (req, res) => {
   await mongoConnect();
+  await connectRedis();
   console.log(`${service} service listening on port ${PORT}`);
 });

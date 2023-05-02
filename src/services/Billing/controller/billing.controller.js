@@ -1,5 +1,6 @@
 const Wallet = require("../model/wallet.mongo");
 const { ErrorHandler } = require("../utils/error");
+const { redisClient } = require("../services/redis");
 
 const createWallet = async (req, res) => {
   await Wallet.updateOne(
@@ -16,8 +17,15 @@ const getWalletAmount = async (username) => {
 };
 
 const updateWalletAmount = async (operation, products, username) => {
-  const totalPrice = calculateTotalPrice(products);
   if (operation === "-") {
+    const totalPrice = calculateTotalPrice(products);
+    await redisClient.set(
+      "trans-data",
+      JSON.stringify({
+        money: totalPrice,
+        username: username,
+      })
+    );
     await Wallet.updateOne(
       { userName: username },
       { $inc: { walletAmount: -totalPrice } }
@@ -26,12 +34,14 @@ const updateWalletAmount = async (operation, products, username) => {
     const wallet = await getWalletAmount(username);
     console.log("wallet amount after purchase", wallet);
   } else if (operation === "+") {
+    const cacheData = await redisClient.get("trans-data");
+    const data = JSON.parse(cacheData);
     await Wallet.updateOne(
-      { userName: username },
-      { $inc: { walletAmount: totalPrice } }
+      { userName: data.username },
+      { $inc: { walletAmount: data.money } }
     );
 
-    const wallet = await getWalletAmount(username);
+    const wallet = await getWalletAmount(data.username);
     console.log("wallet amount after compensating restore", wallet);
   }
 };
